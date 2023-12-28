@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  #port: 443
+  #ssl:
+    #key-store: /data/keystore.jks
+    #key-store-password: TB@8948
+    #keyStoreType: JKS
+    #keyAlias: tomcat
+  servlet:
+    context-path: /bvr
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+spring:
+#  mvc:
+#    throw-exception-if-no-handler-found: true
+  profiles:
+    active: qa
+    #active: prod
+    #active: mobilfox
+    #active: qa
+    #active: tblite
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+  favicon:
+    enabled: false
+bvr:
+  web:
+    build:
+      version: 1
+
+

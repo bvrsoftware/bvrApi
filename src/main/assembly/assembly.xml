@@ -1,0 +1,24 @@
+<assembly>
+	<formats>
+		<format>tar.gz</format>
+		<!-- <format>zip</format> -->
+	</formats>
+	<includeBaseDirectory>true</includeBaseDirectory>
+	<fileSets>
+		<fileSet>
+			<directory>target</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>*.war</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>scripts</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>*.sh</include>
+			</includes>
+			<fileMode>0755</fileMode>
+		</fileSet>
+	</fileSets>
+</assembly>
