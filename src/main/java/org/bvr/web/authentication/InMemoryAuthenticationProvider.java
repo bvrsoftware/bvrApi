@@ -22,7 +22,7 @@ import java.util.Collection;
 public class InMemoryAuthenticationProvider implements AuthenticationProvider {
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired(required = false)
+    @Autowired
     private BvrSoftwareUserService bvrSoftwareUserService;
 
     @PostConstruct

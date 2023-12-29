@@ -4,11 +4,6 @@ import com.bvr.core.domain.BvrSoftwareUser;
 import com.bvr.core.domain.service.BvrSoftwareUserService;
 import com.bvr.core.util.JwtTokenProvider;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +16,11 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -34,10 +34,41 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @Autowired(required = false)
+    @Autowired
     private BvrSoftwareUserService bvrSoftwareUserService;
     @Autowired
     private Environment environment;
+
+
+    private String getJwtFromRequest(HttpServletRequest request,HttpServletResponse response,String path) {
+        String jwt = null;
+        final String authorizationHeader = request.getHeader("Authorization");
+        if (StringUtils.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
+            jwt = authorizationHeader.substring(7).trim();
+        } else {
+            Cookie[] cookies = request.getCookies();
+            if(cookies!=null) {
+                jwt = Stream.of(cookies).filter(ck -> ck.getName().equals("Token")).findFirst().orElse(new Cookie("Token", null)).getValue();
+            }
+        }
+        return jwt;
+    }
+
+    private boolean doNotSkipRequest(String path) {
+        return(path.contains("/rest")||path.contains("/ajax")||path.contains("/web"));
+    }
+
+    private boolean skipRequest(String path) {
+        return StringUtils.equals(path, "/bvr/") || StringUtils.containsAny(path, "/resources","/login","/v3/signin","/public","/privacyPolicy","/share");
+    }
+
+    private String getPath(HttpServletRequest request) {
+        String path = "";
+        try {
+            path = request.getRequestURI();
+        } catch (Exception e) {}
+        return path;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -84,34 +115,4 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
-    private String getJwtFromRequest(HttpServletRequest request,HttpServletResponse response,String path) {
-        String jwt = null;
-        final String authorizationHeader = request.getHeader("Authorization");
-        if (StringUtils.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7).trim();
-        } else {
-            Cookie[] cookies = request.getCookies();
-            if(cookies!=null) {
-                jwt = Stream.of(cookies).filter(ck -> ck.getName().equals("Token")).findFirst().orElse(new Cookie("Token", null)).getValue();
-            }
-        }
-        return jwt;
-    }
-
-    private boolean doNotSkipRequest(String path) {
-        return(path.contains("/rest")||path.contains("/ajax")||path.contains("/web"));
-    }
-
-    private boolean skipRequest(String path) {
-        return StringUtils.equals(path, "/bvr/") || StringUtils.containsAny(path, "/resources","/login","/v3/signin","/public","/privacyPolicy","/share");
-    }
-
-    private String getPath(HttpServletRequest request) {
-        String path = "";
-        try {
-            path = request.getRequestURI();
-        } catch (Exception e) {}
-        return path;
-    }
-
 }

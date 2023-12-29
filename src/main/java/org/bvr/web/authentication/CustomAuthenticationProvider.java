@@ -20,7 +20,7 @@ import java.util.Collection;
 public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired(required = false)
+    @Autowired
     private UserDetailsService userDetailsService;
 
     @Override
